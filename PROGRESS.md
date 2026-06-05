@@ -1,33 +1,34 @@
-# AMR-WMS — Progress Log
+# PROGRESS — Sprint 8 — Localizações CRUD
 
-## Sprint 8 | 05/06/2026
+**Data:** 2026-06-05  
+**Branch:** `claude/new-session-D5smy`
 
-### ✅ Scaffold completo — commit `68a02b3`
+## Status: ✅ Concluído
 
-**Backend (.NET 10)**
-- [x] AMR.WMS.slnx — solução com 6 projetos
-- [x] Domain: Localizacao, MovimentacaoEstoque, enums, interfaces
-- [x] Application: CriarLocalizacaoCommand + ListarLocalizacoesQuery (CQRS/MediatR 12)
-- [x] Infrastructure: EF Core + SQLite, repositories, UoW, seed 30 localizações
-- [x] API: porta 5188, Swagger, ExceptionHandlingMiddleware, ValidationBehavior, Serilog
-- [x] Migration: InitialCreate gerada
+## O que foi implementado
 
-**Testes**
-- [x] 11/11 passando (xUnit + FluentAssertions + Moq)
+### Backend (API)
+- `GET /api/localizacoes` — lista todas as localizações (existente)
+- `POST /api/localizacoes` — cria nova localização (existente)
+- `PUT /api/localizacoes/{id}` — atualiza capacidade e tipo ✅ novo
+- `DELETE /api/localizacoes/{id}` — remove localização sem estoque ✅ novo
+- `GET /api/localizacoes/disponiveis` — localizações com espaço livre ✅ novo
+- `GET /api/localizacoes/zona/{zona}` — localizações por zona ✅ novo
 
-**Frontend (React 19)**
-- [x] Vite 6.0.5 + Bootstrap 5 + Lucide React
-- [x] Porta 5177, proxy /api → http://localhost:5188
-- [x] Sidebar: Dashboard, Localizações, Recebimento, Separação, Relatórios
-- [x] DashboardPage placeholder "WMS em construção"
+### Application (CQRS)
+- `AtualizarLocalizacaoCommand` + Validator + Handler ✅
+- `RemoverLocalizacaoCommand` + Handler ✅
+- `ObterDisponiveisQuery` + Handler ✅
+- `ListarPorZonaQuery` + Handler ✅
 
-**Infra**
-- [x] Dockerfile API (multi-stage .NET 10)
-- [x] frontend/Dockerfile (multi-stage nginx)
-- [x] docker-compose.yml (api :5188 + web :5177)
-- [x] .github/workflows/ci.yml (build + test + workflow_dispatch)
-- [x] CLAUDE.md com contexto completo
+### Domain / Infrastructure
+- `ILocalizacaoRepository` — adicionados `ListarDisponiveisAsync` e `ListarPorZonaAsync` ✅
+- `LocalizacaoRepository` — implementações dos novos métodos ✅
 
-**Git**
-- [x] Repositório criado: https://github.com/al-ramos/AMR-WMS
-- [x] Push para main concluído
+### Frontend
+- `LocalizacoesPage.tsx` — implementação completa ✅
+  - Tabela por zona com agrupamento dinâmico
+  - Barra de ocupação colorida (verde <70% / amarelo 70-90% / vermelho >90%)
+  - Modal criar/editar
+  - Filtros por Zona e TipoLocalizacao
+  - Botão de remoção desabilitado quando há estoque
