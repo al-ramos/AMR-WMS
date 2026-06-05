@@ -8,6 +8,12 @@ public static class AmrWmsSeed
 {
     public static async Task AplicarAsync(AmrWmsDbContext ctx)
     {
+        await SeedLocalizacoes(ctx);
+        await SeedOrdensSeparacao(ctx);
+    }
+
+    private static async Task SeedLocalizacoes(AmrWmsDbContext ctx)
+    {
         if (await ctx.Localizacoes.AnyAsync()) return;
 
         var localizacoes = new List<Localizacao>();
@@ -40,6 +46,25 @@ public static class AmrWmsSeed
         }
 
         ctx.Localizacoes.AddRange(localizacoes);
+        await ctx.SaveChangesAsync();
+    }
+
+    private static async Task SeedOrdensSeparacao(AmrWmsDbContext ctx)
+    {
+        if (await ctx.OrdensSeparacao.AnyAsync()) return;
+
+        var ordens = new[]
+        {
+            OrdemSeparacao.Criar(1001, [(101, 5), (102, 3)]),
+            OrdemSeparacao.Criar(1002, [(103, 10)]),
+            OrdemSeparacao.Criar(1003, [(104, 2), (105, 8), (106, 4)]),
+        };
+
+        ordens[1].IniciarSeparacao();
+        ordens[2].IniciarSeparacao();
+        ordens[2].Concluir();
+
+        ctx.OrdensSeparacao.AddRange(ordens);
         await ctx.SaveChangesAsync();
     }
 }

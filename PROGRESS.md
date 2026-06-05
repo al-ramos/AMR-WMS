@@ -1,33 +1,35 @@
-# AMR-WMS — Progress Log
+# PROGRESS — Sprint 8 — Dashboard WMS
 
-## Sprint 8 | 05/06/2026
+**Data:** 2026-06-05  
+**Branch:** `claude/new-session-D5smy`
 
-### ✅ Scaffold completo — commit `68a02b3`
+## Status: ✅ Concluído
 
-**Backend (.NET 10)**
-- [x] AMR.WMS.slnx — solução com 6 projetos
-- [x] Domain: Localizacao, MovimentacaoEstoque, enums, interfaces
-- [x] Application: CriarLocalizacaoCommand + ListarLocalizacoesQuery (CQRS/MediatR 12)
-- [x] Infrastructure: EF Core + SQLite, repositories, UoW, seed 30 localizações
-- [x] API: porta 5188, Swagger, ExceptionHandlingMiddleware, ValidationBehavior, Serilog
-- [x] Migration: InitialCreate gerada
+## Implementado
 
-**Testes**
-- [x] 11/11 passando (xUnit + FluentAssertions + Moq)
+### Application (CQRS)
+- `IDashboardRepository` interface + DTOs em `Application/Dashboard/`
+- `GetDashboardWmsKpisQuery` (KPIs com filtro por dias)
+- `GetOcupacaoPorZonaQuery`
+- `GetTopProdutosQuery` (filtro por dias)
+- `GetAlertasQuery`
 
-**Frontend (React 19)**
-- [x] Vite 6.0.5 + Bootstrap 5 + Lucide React
-- [x] Porta 5177, proxy /api → http://localhost:5188
-- [x] Sidebar: Dashboard, Localizações, Recebimento, Separação, Relatórios
-- [x] DashboardPage placeholder "WMS em construção"
+### Infrastructure
+- `DashboardRepository` com EF Core direto (agregações por zona, top produtos, alertas)
+- DI registrado em `InfrastructureServiceExtensions`
 
-**Infra**
-- [x] Dockerfile API (multi-stage .NET 10)
-- [x] frontend/Dockerfile (multi-stage nginx)
-- [x] docker-compose.yml (api :5188 + web :5177)
-- [x] .github/workflows/ci.yml (build + test + workflow_dispatch)
-- [x] CLAUDE.md com contexto completo
+### API
+- `DashboardController`:
+  - GET /api/dashboard/wms?dias=1
+  - GET /api/dashboard/wms/ocupacao
+  - GET /api/dashboard/wms/top-produtos?dias=30
+  - GET /api/dashboard/wms/alertas
 
-**Git**
-- [x] Repositório criado: https://github.com/al-ramos/AMR-WMS
-- [x] Push para main concluído
+### Frontend
+- `DashboardPage.tsx` completo:
+  - Filtro período: Hoje / 7 dias / 30 dias
+  - 4 KPI cards: Total Localizações, Ocupação Média, Ordens Separação, Ordens Recebimento
+  - Gráfico de barras (Recharts) — ocupação % por zona, cores dinâmicas
+  - Tabela de alertas (>90% ocupação)
+  - Top 10 produtos movimentados
+- `recharts` instalado

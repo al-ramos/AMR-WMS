@@ -16,6 +16,18 @@ public class LocalizacaoRepository(AmrWmsDbContext ctx) : ILocalizacaoRepository
     public async Task<IReadOnlyList<Localizacao>> ListarAsync(CancellationToken ct = default)
         => await ctx.Localizacoes.OrderBy(x => x.Zona).ThenBy(x => x.Corredor).ThenBy(x => x.Prateleira).ThenBy(x => x.Posicao).ToListAsync(ct);
 
+    public async Task<IReadOnlyList<Localizacao>> ListarDisponiveisAsync(CancellationToken ct = default)
+        => await ctx.Localizacoes
+            .Where(x => x.Ocupacao < x.Capacidade)
+            .OrderBy(x => x.Zona).ThenBy(x => x.Corredor).ThenBy(x => x.Prateleira).ThenBy(x => x.Posicao)
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<Localizacao>> ListarPorZonaAsync(string zona, CancellationToken ct = default)
+        => await ctx.Localizacoes
+            .Where(x => x.Zona == zona.ToUpper())
+            .OrderBy(x => x.Corredor).ThenBy(x => x.Prateleira).ThenBy(x => x.Posicao)
+            .ToListAsync(ct);
+
     public async Task AdicionarAsync(Localizacao localizacao, CancellationToken ct = default)
         => await ctx.Localizacoes.AddAsync(localizacao, ct);
 
