@@ -1,34 +1,47 @@
-# PROGRESS — Sprint 8 — Localizações CRUD
+# PROGRESS — Sprint 8 — Separação (Picking)
 
 **Data:** 2026-06-05  
 **Branch:** `claude/new-session-D5smy`
 
 ## Status: ✅ Concluído
 
-## O que foi implementado
+## Implementado
 
-### Backend (API)
-- `GET /api/localizacoes` — lista todas as localizações (existente)
-- `POST /api/localizacoes` — cria nova localização (existente)
-- `PUT /api/localizacoes/{id}` — atualiza capacidade e tipo ✅ novo
-- `DELETE /api/localizacoes/{id}` — remove localização sem estoque ✅ novo
-- `GET /api/localizacoes/disponiveis` — localizações com espaço livre ✅ novo
-- `GET /api/localizacoes/zona/{zona}` — localizações por zona ✅ novo
+### Domain
+- `StatusSeparacao` enum (Aberta/EmSeparacao/Concluida)
+- `OrdemSeparacao` entity com factory `Criar()`, `IniciarSeparacao()`, `Concluir()`
+- `ItemSeparacao` entity com factory `Criar()`, `Separar(localizacaoId, quantidade)`
+- `IOrdemSeparacaoRepository` interface
 
 ### Application (CQRS)
-- `AtualizarLocalizacaoCommand` + Validator + Handler ✅
-- `RemoverLocalizacaoCommand` + Handler ✅
-- `ObterDisponiveisQuery` + Handler ✅
-- `ListarPorZonaQuery` + Handler ✅
+- `CriarOrdemSeparacaoCommand` + Validator + Handler
+- `SepararItemCommand` + Validator + Handler (inicia ordem se Aberta, atualiza ocupação da localização)
+- `ConcluirSeparacaoCommand` + Validator + Handler
+- `ListarOrdensSeparacaoQuery` + Handler + DTOs
+- `GetPVsAprovadosQuery` + Handler (via IAmrCoreService)
+- `IAmrCoreService` interface
 
-### Domain / Infrastructure
-- `ILocalizacaoRepository` — adicionados `ListarDisponiveisAsync` e `ListarPorZonaAsync` ✅
-- `LocalizacaoRepository` — implementações dos novos métodos ✅
+### Infrastructure
+- `AmrCoreService` (HttpClient → Core :5001)
+- `OrdemSeparacaoRepository` com Include de Itens
+- `OrdemSeparacaoConfiguration` + `ItemSeparacaoConfiguration`
+- Migration `20260605200000_AddSeparacao` (tabelas OrdensSeparacao + ItensSeparacao)
+- Snapshot atualizado
+- Seed demo: 3 ordens (Aberta, EmSeparacao, Concluida)
+- DI: IOrdemSeparacaoRepository, IAmrCoreService + HttpClient
+
+### API
+- `SeparacaoController`:
+  - GET /api/separacao
+  - GET /api/separacao/pv-aprovados
+  - POST /api/separacao/criar
+  - PUT /api/separacao/{id}/separar-item
+  - PUT /api/separacao/{id}/concluir
+- `appsettings.json`: AmrCore.BaseUrl configurado
 
 ### Frontend
-- `LocalizacoesPage.tsx` — implementação completa ✅
-  - Tabela por zona com agrupamento dinâmico
-  - Barra de ocupação colorida (verde <70% / amarelo 70-90% / vermelho >90%)
-  - Modal criar/editar
-  - Filtros por Zona e TipoLocalizacao
-  - Botão de remoção desabilitado quando há estoque
+- `SeparacaoPage.tsx` completa:
+  - Lista ordens por status (Em Separação → Abertas → Concluídas)
+  - Modal Nova Ordem: busca PVs aprovados no Core, fallback mock
+  - Modal Separar Item: localização FIFO (menor ocupação primeiro), quantidade editável
+  - Botão Concluir por ordem
