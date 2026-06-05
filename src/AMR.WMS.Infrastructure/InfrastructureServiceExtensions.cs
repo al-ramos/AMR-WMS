@@ -1,3 +1,4 @@
+using AMR.WMS.Application.Dashboard;
 using AMR.WMS.Application.Separacao.Services;
 using AMR.WMS.Domain.Interfaces;
 using AMR.WMS.Infrastructure.Data;
@@ -20,6 +21,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ILocalizacaoRepository, LocalizacaoRepository>();
         services.AddScoped<IMovimentacaoRepository, MovimentacaoRepository>();
         services.AddScoped<IOrdemSeparacaoRepository, OrdemSeparacaoRepository>();
+        services.AddScoped<IDashboardRepository, DashboardRepository>();
 
         services.AddHttpClient<IAmrCoreService, AmrCoreService>(client =>
             client.BaseAddress = new Uri(config["AmrCore:BaseUrl"] ?? "http://localhost:5001/"));

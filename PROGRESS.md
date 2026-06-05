@@ -1,4 +1,4 @@
-# PROGRESS — Sprint 8 — Separação (Picking)
+# PROGRESS — Sprint 8 — Dashboard WMS
 
 **Data:** 2026-06-05  
 **Branch:** `claude/new-session-D5smy`
@@ -7,41 +7,29 @@
 
 ## Implementado
 
-### Domain
-- `StatusSeparacao` enum (Aberta/EmSeparacao/Concluida)
-- `OrdemSeparacao` entity com factory `Criar()`, `IniciarSeparacao()`, `Concluir()`
-- `ItemSeparacao` entity com factory `Criar()`, `Separar(localizacaoId, quantidade)`
-- `IOrdemSeparacaoRepository` interface
-
 ### Application (CQRS)
-- `CriarOrdemSeparacaoCommand` + Validator + Handler
-- `SepararItemCommand` + Validator + Handler (inicia ordem se Aberta, atualiza ocupação da localização)
-- `ConcluirSeparacaoCommand` + Validator + Handler
-- `ListarOrdensSeparacaoQuery` + Handler + DTOs
-- `GetPVsAprovadosQuery` + Handler (via IAmrCoreService)
-- `IAmrCoreService` interface
+- `IDashboardRepository` interface + DTOs em `Application/Dashboard/`
+- `GetDashboardWmsKpisQuery` (KPIs com filtro por dias)
+- `GetOcupacaoPorZonaQuery`
+- `GetTopProdutosQuery` (filtro por dias)
+- `GetAlertasQuery`
 
 ### Infrastructure
-- `AmrCoreService` (HttpClient → Core :5001)
-- `OrdemSeparacaoRepository` com Include de Itens
-- `OrdemSeparacaoConfiguration` + `ItemSeparacaoConfiguration`
-- Migration `20260605200000_AddSeparacao` (tabelas OrdensSeparacao + ItensSeparacao)
-- Snapshot atualizado
-- Seed demo: 3 ordens (Aberta, EmSeparacao, Concluida)
-- DI: IOrdemSeparacaoRepository, IAmrCoreService + HttpClient
+- `DashboardRepository` com EF Core direto (agregações por zona, top produtos, alertas)
+- DI registrado em `InfrastructureServiceExtensions`
 
 ### API
-- `SeparacaoController`:
-  - GET /api/separacao
-  - GET /api/separacao/pv-aprovados
-  - POST /api/separacao/criar
-  - PUT /api/separacao/{id}/separar-item
-  - PUT /api/separacao/{id}/concluir
-- `appsettings.json`: AmrCore.BaseUrl configurado
+- `DashboardController`:
+  - GET /api/dashboard/wms?dias=1
+  - GET /api/dashboard/wms/ocupacao
+  - GET /api/dashboard/wms/top-produtos?dias=30
+  - GET /api/dashboard/wms/alertas
 
 ### Frontend
-- `SeparacaoPage.tsx` completa:
-  - Lista ordens por status (Em Separação → Abertas → Concluídas)
-  - Modal Nova Ordem: busca PVs aprovados no Core, fallback mock
-  - Modal Separar Item: localização FIFO (menor ocupação primeiro), quantidade editável
-  - Botão Concluir por ordem
+- `DashboardPage.tsx` completo:
+  - Filtro período: Hoje / 7 dias / 30 dias
+  - 4 KPI cards: Total Localizações, Ocupação Média, Ordens Separação, Ordens Recebimento
+  - Gráfico de barras (Recharts) — ocupação % por zona, cores dinâmicas
+  - Tabela de alertas (>90% ocupação)
+  - Top 10 produtos movimentados
+- `recharts` instalado
