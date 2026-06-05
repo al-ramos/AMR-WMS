@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="src/AMR.WMS.Domain/AMR.WMS.Domain.csproj" />
+  <Project Path="src/AMR.WMS.Shared/AMR.WMS.Shared.csproj" />
+  <Project Path="src/AMR.WMS.Application/AMR.WMS.Application.csproj" />
+  <Project Path="src/AMR.WMS.Infrastructure/AMR.WMS.Infrastructure.csproj" />
+  <Project Path="src/AMR.WMS.API/AMR.WMS.API.csproj" />
+  <Project Path="tests/AMR.WMS.Tests/AMR.WMS.Tests.csproj" />
+</Solution>
