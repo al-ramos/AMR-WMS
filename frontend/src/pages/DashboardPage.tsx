@@ -195,7 +195,7 @@ export default function DashboardPage() {
                         <XAxis dataKey="zona" tick={{ fontSize: 12 }} />
                         <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 11 }} />
                         <Tooltip
-                          formatter={(val: number) => [`${val}%`, 'Ocupação']}
+                          formatter={(val) => [`${Number(val ?? 0)}%`, 'Ocupação']}
                           labelFormatter={l => `Zona ${l}`}
                         />
                         <Bar dataKey="ocupacaoPct" radius={[4, 4, 0, 0]} name="Ocupação">

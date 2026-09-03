@@ -10,6 +10,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__AmrWms=Data Source=/data/amr_wms.db
+      - Cors__AllowedOrigins=http://localhost:5177
+      - AmrCore__BaseUrl=http://host.docker.internal:5001/
 
   web:
     build:

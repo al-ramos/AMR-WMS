@@ -42,7 +42,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddValidatorsFromAssembly(typeof(CriarLocalizacaoCommand).Assembly);
 
 // ── Infrastructure ────────────────────────────────────────────────────────────
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 
 // ── Rate Limiting ─────────────────────────────────────────────────────────────
 builder.Services.AddRateLimiter(options =>
@@ -66,11 +66,22 @@ builder.Services.AddRateLimiter(options =>
 });
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
+// As origens vem de Cors:AllowedOrigins, aceito como string unica ou array.
+// Nenhuma origem fica fixada no codigo: em producao a origem e injetada por
+// variavel de ambiente (Cors__AllowedOrigins). Sem origem configurada a
+// politica nao libera nenhuma — o fallback antigo WithOrigins("*") era tratado
+// pelo ASP.NET Core como a origem literal "*" e nunca liberou nada de fato.
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? (builder.Configuration["Cors:AllowedOrigins"] is { Length: > 0 } origemUnica
+        ? new[] { origemUnica }
+        : Array.Empty<string>());
+
 builder.Services.AddCors(opts =>
     opts.AddPolicy("AmrWms", policy =>
-        policy.WithOrigins(builder.Configuration["Cors:AllowedOrigins"] ?? "*")
-              .AllowAnyMethod()
-              .AllowAnyHeader()));
+    {
+        if (corsOrigins.Length > 0)
+            policy.WithOrigins(corsOrigins).AllowAnyMethod().AllowAnyHeader();
+    }));
 
 var app = builder.Build();
 
@@ -110,6 +121,27 @@ app.Use(async (ctx, next) =>
 app.UseCors("AmrWms");
 app.UseRateLimiter();
 app.UseAuthorization();
+// Health checks — o target group do ALB precisa de um caminho que responda sem
+// depender de nada. /health e liveness pura (o processo subiu); /health/ready
+// verifica o banco, que e a unica dependencia externa da API hoje.
+app.MapGet("/health", () => Results.Ok(new { status = "healthy" }))
+   .ExcludeFromDescription();
+
+app.MapGet("/health/ready", async (IServiceProvider sp, CancellationToken ct) =>
+{
+    try
+    {
+        using var scope = sp.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AmrWmsDbContext>();
+        await db.Database.CanConnectAsync(ct);
+        return Results.Ok(new { status = "ready" });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { status = "degraded", detail = ex.Message }, statusCode: 503);
+    }
+}).ExcludeFromDescription();
+
 app.MapControllers();
 
 app.Run();
