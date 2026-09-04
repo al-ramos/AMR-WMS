@@ -90,7 +90,14 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AmrWmsDbContext>();
     db.Database.Migrate();
-    await AmrWmsSeed.AplicarAsync(db);
+    // Layout de armazem e ordens de exemplo — demonstracao, nao referencia.
+    // Ver SEED-01.
+    if (app.Configuration.GetValue<bool>("Seed:DadosDemo"))
+    {
+        await AmrWmsSeed.AplicarDemoAsync(db);
+        app.Logger.LogWarning(
+            "Seed:DadosDemo ligado — a base foi populada com dados de demonstracao ficticios.");
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();

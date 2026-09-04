@@ -4,9 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AMR.WMS.Infrastructure.Data;
 
+/// <summary>
+/// Seed de demonstração do AMR-WMS: um layout de armazém fictício (zonas A e B,
+/// corredores 01 e 02) e três ordens de separação de exemplo.
+///
+/// O endereçamento parece dado de referência, mas não é: cada armazém tem o seu,
+/// e nascer com um layout inventado é pior do que nascer vazio — o operador
+/// endereça mercadoria numa posição que não existe no prédio.
+///
+/// Só roda com Seed:DadosDemo ligado. Ver SEED-01.
+/// </summary>
 public static class AmrWmsSeed
 {
-    public static async Task AplicarAsync(AmrWmsDbContext ctx)
+    public static async Task AplicarDemoAsync(AmrWmsDbContext ctx)
     {
         await SeedLocalizacoes(ctx);
         await SeedOrdensSeparacao(ctx);
